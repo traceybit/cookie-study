@@ -64,8 +64,10 @@ recipe_lut <- tibble(preference = c("Cookie A", "Cookie B", "Cookie C", "Cookie 
 
 overall_df2 <- overall_df %>%
   mutate(value = 1) %>%
-  left_join(recipe_lut) %>%
-  group_by(category, recipe, recipe_general) %>%
+  left_join(recipe_lut)
+
+overall_df3 <- overall_df2 %>%
+  group_by(category, recipe_general) %>%
   summarise(value = sum(value)) %>%
   ungroup() %>%
   group_by(category) %>%
@@ -77,20 +79,70 @@ overall_df2 <- overall_df %>%
                             ifelse(category == "fave_choc_chip", "Chocolate chip", "Overall"))) 
   
 
-overall_df2$cat_label <- factor(overall_df2$cat_label, levels = c("Chocolate chip", "Chip-less", "Overall"))
-overall_df2$recipe <- factor(overall_df2$recipe, levels = c("No preference", "NYT: chip-less", "LA Times: chip-less",
-                                                            "NYT: chips", "LA Times: chips"))
+overall_df3$cat_label <- factor(overall_df3$cat_label, levels = c("Chocolate chip", "Chip-less", "Overall"))
+overall_df3$recipe_general <- factor(overall_df3$recipe_general, levels = c("No preference", "NYT", "LA Times"))
+
 
 ## figure
-overall_fig <- ggplot(overall_df2, aes(fill = recipe, x = cat_label, y = value, label = perc_lab)) + 
+overall_fig <- ggplot(overall_df3, aes(fill = recipe_general, x = cat_label, y = value, label = perc_lab)) + 
   geom_bar(position = "fill", stat = "identity") +
   geom_text(position = position_fill(vjust=0.5), colour="white") +
   labs(x = NULL,
        y = NULL) +
   theme_minimal() +
+  scale_fill_manual(values= c("#f4a261", "#2a9d8f",  "#264653"),
+                    guide = guide_legend(reverse = TRUE)) +
+  scale_y_continuous(labels = scales::percent) +
   theme(legend.position = "top",
         legend.title = element_blank())
   
-  
-  
-  
+# ## figure
+# chips_df <- overall_df2 %>%
+#   mutate(cat_label = ifelse(category == "fave_chipless", "Chip-less",
+#                      ifelse(category == "fave_choc_chip", "Chocolate chip", "Overall"))) %>% 
+#   filter(cat_label == "Overall") %>%
+#   mutate(chips_cat = ifelse(recipe %in% c("LA Times: chips", "NYT: chips"), "Chips",
+#                             ifelse(recipe == "No preference", "No preference", "Chip-less"))) +
+#   group_by(category, recipe, recipe_general) %>%
+#   summarise(value = sum(value)) %>%
+#   ungroup() %>%
+#   group_by(category) %>%
+#   mutate(total = sum(value)) %>%
+#   ungroup() %>%
+#   mutate(perc = value / total * 100,
+#          perc_lab = paste0(round(perc), "%"),
+#          cat_label = ifelse(category == "fave_chipless", "Chip-less",
+#                             ifelse(category == "fave_choc_chip", "Chocolate chip", "Overall"))) 
+# 
+# chips_df$cat_label <- factor(chips_df$cat_label, levels = c("Chocolate chip", "Chip-less", "Overall"))
+# chips_df$recipe_general <- factor(chips_df$recipe_general, levels = c("No preference", "NYT", "LA Times"))
+# chips_df$recipe <- factor(chips_df$recipe, levels = c("No preference", "NYT: chip-less", "LA Times: chip-less",
+#                                                             "NYT: chips", "LA Times: chips"))
+# 
+# ## chips
+# chips_fig <- ggplot(chips_df, aes(fill = recipe_general, x = cat_label, y = value, label = perc_lab)) + 
+#   geom_bar(position = "fill", stat = "identity") +
+#   geom_text(position = position_fill(vjust=0.5), colour="white") +
+#   labs(x = NULL,
+#        y = NULL) +
+#   theme_minimal() +
+#   scale_fill_manual(values= c("#f4a261", "#2a9d8f",  "#264653"),
+#                     guide = guide_legend(reverse = TRUE)) +
+#   scale_y_continuous(labels = scales::percent) +
+#   theme(legend.position = "top",
+#         legend.title = element_blank())
+# 
+# ## chips vs chipless
+# overall_df3 <- overall_df2 %>%
+#   group_by(category, recipe_general) %>%
+#   summarise(value = sum(value)) %>%
+#   ungroup() %>%
+#   group_by(category) %>%
+#   mutate(total = sum(value)) %>%
+#   ungroup() %>%
+#   mutate(perc = value / total * 100,
+#          perc_lab = paste0(round(perc), "%"),
+#          cat_label = ifelse(category == "fave_chipless", "Chip-less",
+#                             ifelse(category == "fave_choc_chip", "Chocolate chip", "Overall"))) 
+# 
+#   
