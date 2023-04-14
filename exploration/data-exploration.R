@@ -5,6 +5,7 @@
 library(tidyverse)
 library(lubridate)
 library(data.table)
+library(here)
 
 ## paths
 main_path <- "/Volumes/GoogleDrive/My Drive/cookie-research/"
@@ -59,6 +60,10 @@ error_entry <- as.ITime("11:37:00")
 
 survey_df3 <- survey_df3 %>%
   filter(time != error_entry)
+
+## save
+fwrite(survey_df3, paste(here("outputs", "processed", "clean_responses.csv")))
+
 
 ## fig 1 -- favorites, all
 overall_df <- survey_df3 %>%
@@ -428,7 +433,6 @@ ggsave(time_fig,
        height = 9,
        units = "in")
 
-  
 
 
 
