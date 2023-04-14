@@ -53,6 +53,9 @@ survey_df3 <- survey_df2 %>%
          time_diff = difftime(date_time, start_date_time, units = "hours"),
          hours = round(as.numeric(time_diff)))
 
+## remove jen's entry
+
+
 ## fig 1 -- favorites, all
 overall_df <- survey_df3 %>%
   select(emlab, age, fave_choc_chip, fave_chipless, fave_overall) %>%
