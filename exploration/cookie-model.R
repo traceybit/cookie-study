@@ -33,6 +33,10 @@ cookie_model_df <- clean_df %>%
 ## run model
 ## -------------------------
 
+## view
+cookie_model_df
+
+## model
 models <-  cookie_model_df %>% 
   group_by(cat_label) %>% 
   do(model = glm(prefer_lat ~
