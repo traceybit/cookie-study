@@ -9,21 +9,21 @@ library(here)
 
 ## paths
 main_path <- "/Volumes/GoogleDrive/My Drive/cookie-research/"
-raw_d_path <- paste0(main_path, "data/raw/")
+# raw_d_path <- paste0(main_path, "data/raw/")
 figs_path <- paste0(main_path, "figures/")
 
 ## files
-survey_results <- "cookie-survey-responses-edit.csv"
+survey_results <- "cookie-survey-responses-edit-id.csv"
 
 ## read in survey results
-survey_df <- fread(paste0(raw_d_path, survey_results))
+survey_df <- fread(here("data", "raw", survey_results))
 
 ## janitor to clean names
 survey_df2 <- janitor::clean_names(survey_df) %>%
   select(-comments_questions)
 
 ## update column names
-survey_cols <- c("timestamp", "fave_choc_chip", "fave_chipless", "fave_overall", "age", "emlab", "name")
+survey_cols <- c("timestamp", "fave_choc_chip", "fave_chipless", "fave_overall", "age", "emlab", "id")
 
 colnames(survey_df2) <- survey_cols
 
@@ -98,7 +98,7 @@ overall_df3$recipe_general <- factor(overall_df3$recipe_general, levels = c("No 
 ## figure
 overall_fig <- ggplot(overall_df3, aes(fill = recipe_general, x = cat_label, y = value, label = perc_lab)) + 
   geom_bar(position = "fill", stat = "identity") +
-  geom_text(position = position_fill(vjust=0.5), colour="white", size = 4) +
+  geom_text(position = position_fill(vjust=0.5), colour="white", size = 6) +
   labs(x = NULL,
        y = NULL) +
   theme_minimal() +
@@ -136,7 +136,7 @@ chips_df$chips_cat <- factor(chips_df$chips_cat, levels = c("No preference", "Ch
 ## chips
 chips_fig <- ggplot(chips_df, aes(fill = chips_cat, x = cat_label, y = value, label = perc_lab)) +
   geom_bar(position = "fill", stat = "identity") +
-  geom_text(position = position_fill(vjust=0.5), colour="white", size = 4) +
+  geom_text(position = position_fill(vjust=0.5), colour="white", size = 6) +
   labs(x = NULL,
        y = NULL) +
   theme_minimal() +
@@ -202,7 +202,7 @@ n_emlab <- overall_df2 %>%
 ## emlab figure
 emlab_fig <- ggplot(overall_emlab, aes(fill = recipe_general, x = emlab, y = value, label = perc_lab)) + 
   geom_bar(position = "fill", stat = "identity") +
-  geom_text(position = position_fill(vjust=0.5), colour="white", size = 4) +
+  geom_text(position = position_fill(vjust=0.5), colour="white", size = 6) +
   facet_wrap(~cat_label) +
   labs(x = NULL,
        y = NULL) +
@@ -254,7 +254,7 @@ n_age <- overall_df2 %>%
 ## age figure
 age_fig <- ggplot(overall_kiddos, aes(fill = recipe_general, x = age, y = value, label = perc_lab)) + 
   geom_bar(position = "fill", stat = "identity") +
-  geom_text(position = position_fill(vjust=0.5), colour="white", size = 4) +
+  geom_text(position = position_fill(vjust=0.5), colour="white", size = 6) +
   facet_wrap(~cat_label) +
   labs(x = NULL,
        y = NULL) +
@@ -314,12 +314,12 @@ emlab_fid$fidelity <- factor(emlab_fid$fidelity , levels = c("switch", "loyal"))
 ## emlab figure
 emlab_fidel_fig <- ggplot(emlab_fid, aes(fill = fidelity, x = emlab, y = value, label = perc_lab)) + 
   geom_bar(position = "fill", stat = "identity") +
-  geom_text(position = position_fill(vjust=0.5), colour="white", size = 4) +
+  geom_text(position = position_fill(vjust=0.5), colour="white", size = 6) +
   labs(x = NULL,
        y = NULL) +
   theme_minimal() +
-  # scale_fill_manual(values= c("#f4a261", "#2a9d8f",  "#264653"),
-  #                   guide = guide_legend(reverse = TRUE)) +
+  scale_fill_manual(values= c("#ffc300", "#0081AF"),
+                    guide = guide_legend(reverse = TRUE)) +
   scale_y_continuous(labels = scales::percent) +
   theme(legend.position = "top",
         legend.title = element_blank(),
@@ -408,11 +408,11 @@ time_df2 <- time_expand %>%
 time_df2$cat_label <- factor(time_df2$cat_label, levels = c("Chocolate chip", "Chip-less", "Overall"))
 time_df2$recipe_general <- factor(time_df2$recipe_general, levels = c("No preference", "NYT", "LA Times"))
 
-time_fig <- ggplot(time_df2, aes(x = hours, y = cumul_like, color = recipe_general)) +
-  geom_line(size = 1, alpha = 0.9) +
+time_fig <- ggplot(time_df2 %>% filter(cat_label == "Chocolate chip"), aes(x = hours, y = cumul_like, color = recipe_general)) +
+  geom_line(size = 3, alpha = 0.9) +
   facet_wrap(~cat_label, ncol = 1) +
   geom_vline(xintercept = 16, size = 0.5, lty = "dashed", color = "black") +
-  annotate("text", x = 16, y = 15, label = "4pm first\nnon-emLab\nresponses", size = 5, hjust = 1) +
+  annotate("text", x = 15.5, y = 15, label = "4pm first\nnon-emLab\nresponses", size = 5, hjust = 1) +
   labs(x = "Approximate hours from bake",
        y = "Cumulative likes") +
   theme_minimal() +
@@ -429,8 +429,8 @@ time_fig <- ggplot(time_df2, aes(x = hours, y = cumul_like, color = recipe_gener
 
 ggsave(time_fig, 
        filename = paste0(figs_path, "pref_time.png"),
-       width = 7,
-       height = 9,
+       width = 9,
+       height = 7,
        units = "in")
 
 

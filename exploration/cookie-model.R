@@ -26,7 +26,8 @@ cookie_model_df <- clean_df %>%
   mutate(cat_label = ifelse(category == "fave_chipless", "Chip-less",
                             ifelse(category == "fave_choc_chip", "Chocolate chip", "Overall"))) %>%
   select(cat_label, recipe_general, hours, emlab) %>%
-  mutate(emlab = ifelse(emlab == "Yes", 1, 0)) %>%
+  # mutate(emlab = ifelse(emlab == "Yes", 1, 0)) %>%
+  mutate(emlab = ifelse(emlab == "Yes", "emLab", "non-emLab")) %>%
   arrange(cat_label, hours) %>%
   mutate(prefer_lat = ifelse(recipe_general == "LA Times", 1, 0))
 
@@ -43,9 +44,18 @@ models <-  cookie_model_df %>%
                    emlab +
                    hours,
                  data = .,
-                 family = binomial(logit)))
+                 family = binomial))
 
 models$model
 
+## chip test
+chip_df <- cookie_model_df %>% 
+  filter(cat_label == "Chocolate chip")
+
+chip_model <- glm(formula = prefer_lat ~ emlab + hours,
+                                 data = chip_df,
+                                 family = binomial)
+
+summary(chip_model)$coefficients
 
 
