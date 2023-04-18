@@ -19,7 +19,7 @@ results_df <- fread(paste0(raw_d_path, survey_results))
 results_df$id <- paste0("R", 1:nrow(results_df))
 
 ## save in gdrive
-fwrite(results_df, paste0(raw_d_path, survey_results, "cookie-survey-responses-edit-name-id.csv"))
+fwrite(results_df, paste0(raw_d_path, "cookie-survey-responses-edit-name-id.csv"))
 
 
 ## remove names

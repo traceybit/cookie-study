@@ -434,6 +434,68 @@ ggsave(time_fig,
        units = "in")
 
 
+## time and emlab/not emlab
+## ------------------------------------------------------
+
+time_emlab_df <- survey_df3 %>%
+  select(emlab, age, fave_choc_chip, fave_chipless, fave_overall, hours) %>%
+  pivot_longer(fave_choc_chip:fave_overall, names_to = "category", values_to= "preference") %>%
+  left_join(recipe_lut) %>%
+  mutate(cat_label = ifelse(category == "fave_chipless", "Chip-less",
+                            ifelse(category == "fave_choc_chip", "Chocolate chip", "Overall"))) %>%
+  select(cat_label, emlab, recipe_general, hours) %>%
+  mutate(value = 1) %>%
+  arrange(cat_label, emlab, recipe_general, hours) %>%
+  group_by(cat_label, emlab, recipe_general, hours) %>%
+  summarise(value = sum(value)) %>%
+  ungroup() %>%
+  mutate(emlab = ifelse(emlab == "No", "non-emLab", "emLab"))
+
+## expand grid
+time_expand2 <- expand.grid(cat_label = unique(time_emlab_df$cat_label),
+                           emlab = unique(time_emlab_df$emlab),
+                           recipe_general = unique(time_emlab_df$recipe_general),
+                           hours = unique(time_emlab_df$hours))
+
+## join
+time_emlab_df2 <- time_expand2 %>%
+  left_join(time_emlab_df) %>%
+  mutate(value = ifelse(is.na(value), 0, value)) %>%
+  arrange(cat_label, emlab, recipe_general, hours) %>%
+  group_by(cat_label, emlab, recipe_general) %>%
+  mutate(cumul_like = cumsum(value)) %>%
+  select(cat_label, emlab, recipe_general, hours, cumul_like)
+
+## 
+time_emlab_df2$cat_label <- factor(time_emlab_df2$cat_label, levels = c("Chocolate chip", "Chip-less", "Overall"))
+time_emlab_df2$recipe_general <- factor(time_emlab_df2$recipe_general, levels = c("No preference", "NYT", "LA Times"))
+
+time_fig2 <- ggplot(time_emlab_df2 %>% filter(cat_label == "Chocolate chip"), aes(x = hours, y = cumul_like, color = recipe_general, lty = emlab)) +
+  geom_line(size = 2, alpha = 0.9) +
+  facet_wrap(~cat_label, ncol = 1) +
+  geom_vline(xintercept = 16, size = 0.5, lty = "dashed", color = "black") +
+  annotate("text", x = 15.5, y = 12, label = "4pm: first\nnon-emLab\nresponses", size = 5, hjust = 1) +
+  labs(x = "Approximate hours from bake",
+       y = "Cumulative likes") +
+  theme_minimal() +
+  xlim(10, 45) +
+  scale_color_manual(values= c("#f4a261", "#2a9d8f",  "#264653"),
+                     guide = guide_legend(reverse = TRUE)) +
+  theme(panel.grid.minor = element_blank(),
+        legend.position = "top",
+        legend.box = "vertical",
+        legend.key.width = unit(2,"cm"),
+        legend.title = element_blank(),
+        axis.text = element_text(size = 16),
+        legend.text = element_text(size = 16),
+        strip.text = element_text(size = 16),
+        axis.title = element_text(size = 16))
+
+ggsave(time_fig2, 
+       filename = paste0(figs_path, "pref_time_emlab.png"),
+       width = 9,
+       height = 9,
+       units = "in")
 
 
 

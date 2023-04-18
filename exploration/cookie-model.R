@@ -52,6 +52,21 @@ models$model
 chip_df <- cookie_model_df %>% 
   filter(cat_label == "Chocolate chip")
 
+## emlab only
+emlab_model <- glm(formula = prefer_lat ~ emlab,
+                  data = chip_df,
+                  family = binomial)
+
+summary(emlab_model)$coefficients
+
+## time only
+time_model <- glm(formula = prefer_lat ~ hours,
+                   data = chip_df,
+                   family = binomial)
+
+summary(time_model)$coefficients
+
+
 chip_model <- glm(formula = prefer_lat ~ emlab + hours,
                                  data = chip_df,
                                  family = binomial)
